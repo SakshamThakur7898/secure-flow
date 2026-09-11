@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SecureFlow — Testing Dashboard</title>
+<link rel="stylesheet" href="/css/styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-mount"></aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <div class="eyebrow">System Testing</div>
+          <h1>Automated Requirement Verification</h1>
+          <div class="subtitle">Runs real checks against the live application — logins, registrations, verification, role checks, and the database — and reports genuine PASS/FAIL results.</div>
+        </div>
+        <div class="row gap-8">
+          <button class="btn btn-secondary" id="clear-history-btn">
+            <i data-lucide="trash-2" style="width:15px;height:15px"></i>Clear History
+          </button>
+          <button class="btn btn-primary" id="run-all-btn">
+            <i data-lucide="play" style="width:15px;height:15px"></i>Run All Tests
+          </button>
+        </div>
+      </div>
+
+      <div class="system-status-banner unknown" id="status-banner">
+        <div class="row gap-12">
+          <div class="check-badge pending" id="banner-icon"><i data-lucide="minus" style="width:16px;height:16px"></i></div>
+          <div>
+            <div style="font-weight:700; font-size:15px;" id="banner-title">Tests have not been run yet</div>
+            <div class="text-muted" style="font-size:13px;" id="banner-subtitle">Click "Run All Tests" to verify all 5 requirements.</div>
+          </div>
+        </div>
+        <div style="min-width:220px;">
+          <div class="row-between" style="font-size:12.5px; margin-bottom:6px;">
+            <span id="progress-label">0 / 5 Requirements</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%;"></div></div>
+        </div>
+      </div>
+
+      <div class="grid grid-2" id="summary-cards" style="grid-template-columns: repeat(3,1fr); margin-bottom: 24px;">
+        <div class="card"><div class="stat-label">Tests Passed</div><div class="stat-value" id="count-passed" style="color:var(--green-600);">0/5</div></div>
+        <div class="card"><div class="stat-label">Tests Failed</div><div class="stat-value" id="count-failed" style="color:var(--red-600);">0/5</div></div>
+        <div class="card"><div class="stat-label">Tests Pending</div><div class="stat-value" id="count-pending" style="color:var(--text-faint);">5/5</div></div>
+      </div>
+
+      <div class="grid grid-2" id="test-cards" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));"></div>
+
+      <div class="card mt-24">
+        <div class="row-between mb-12">
+          <div class="section-title" style="margin-bottom:0;">Test Execution Log</div>
+        </div>
+        <div class="log-panel" id="log-panel">
+          <div class="text-faint">Log output will appear here once you run a test.</div>
+        </div>
+      </div>
+
+      <div class="card mt-24">
+        <div class="section-title">Test History</div>
+        <div class="table-wrap"><table id="history-table">
+          <thead><tr><th>Requirement</th><th>Status</th><th>Date</th><th>Duration</th><th>Details</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/testing.js"></script>
+</body>
+</html>

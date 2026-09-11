@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SecureFlow — Sign In</title>
+<link rel="stylesheet" href="/css/styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+</head>
+<body>
+  <div class="centered-shell">
+    <div class="auth-card">
+      <div class="brand">
+        <div class="brand-mark">SF</div>
+        <div class="brand-name">SecureFlow<small>User Management &amp; Storage System</small></div>
+      </div>
+
+      <div class="alert alert-error" id="alert-error" role="alert"></div>
+      <div class="alert alert-success" id="alert-success" role="status"></div>
+
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="identifier">Email or Username</label>
+          <input id="identifier" name="identifier" type="text" autocomplete="username" placeholder="you@company.com" />
+          <div class="field-error"></div>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-field">
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+            <button type="button" class="password-toggle" id="toggle-password" aria-label="Show password">SHOW</button>
+          </div>
+          <div class="field-error"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="login-btn">
+          <span id="login-btn-label">Log In</span>
+          <span id="login-spinner" class="spinner" style="display:none;"></span>
+        </button>
+      </form>
+
+      <p class="mt-16 text-muted" style="text-align:center; font-size: 13.5px;">
+        Don't have an account? <a href="/register">Create an account</a>
+      </p>
+
+      <hr class="divider" />
+      <p class="text-faint" style="font-size: 12px; text-align:center;">
+        Demo accounts — see README for credentials:<br />
+        <strong>admin</strong> · <strong>manager</strong> · <strong>employee</strong> · <strong>pending</strong>
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>

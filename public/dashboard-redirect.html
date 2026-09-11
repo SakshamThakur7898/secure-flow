@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>SecureFlow</title>
+<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="centered-shell"><span class="spinner"></span></div>
+  <script src="/js/api.js"></script>
+  <script>
+    (async () => {
+      const { ok, data } = await SecureFlow.apiFetch('/api/auth/me');
+      if (!ok) { window.location.href = '/'; return; }
+      const role = data.user.role;
+      window.location.href = (role === 'Admin' || role === 'Manager') ? '/admin' : '/dashboard';
+    })();
+  </script>
+</body>
+</html>

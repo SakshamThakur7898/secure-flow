@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SecureFlow — Create Account</title>
+<link rel="stylesheet" href="/css/styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+</head>
+<body>
+  <div class="centered-shell">
+    <div class="auth-card" style="max-width: 480px;">
+      <div class="brand">
+        <div class="brand-mark">SF</div>
+        <div class="brand-name">SecureFlow<small>New User Registration</small></div>
+      </div>
+
+      <div class="alert alert-error" id="alert-error" role="alert"></div>
+      <div class="alert alert-success" id="alert-success" role="status"></div>
+
+      <form id="register-form" novalidate>
+        <div class="grid grid-2" style="gap: 0 14px;">
+          <div class="field">
+            <label for="fullName">Full Name</label>
+            <input id="fullName" name="fullName" type="text" autocomplete="name" />
+            <div class="field-error"></div>
+          </div>
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" autocomplete="username" />
+            <div class="field-error"></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" />
+          <div class="field-error"></div>
+        </div>
+
+        <div class="grid grid-2" style="gap: 0 14px;">
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="password-field">
+              <input id="password" name="password" type="password" autocomplete="new-password" />
+              <button type="button" class="password-toggle" data-toggle-for="password">SHOW</button>
+            </div>
+            <div class="strength-meter" id="strength-meter">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="strength-label" id="strength-label">&nbsp;</div>
+            <div class="field-error"></div>
+          </div>
+          <div class="field">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="password-field">
+              <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" />
+              <button type="button" class="password-toggle" data-toggle-for="confirmPassword">SHOW</button>
+            </div>
+            <div class="field-error"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="gap: 0 14px;">
+          <div class="field">
+            <label for="employeeId">Employee ID</label>
+            <input id="employeeId" name="employeeId" type="text" placeholder="EMP-1234" />
+            <div class="field-error"></div>
+          </div>
+          <div class="field">
+            <label for="department">Department</label>
+            <input id="department" name="department" type="text" placeholder="Engineering" />
+            <div class="field-error"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="gap: 0 14px;">
+          <div class="field">
+            <label for="phone">Phone Number <span class="text-faint">(optional)</span></label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" />
+          </div>
+          <div class="field">
+            <label for="role">Requested Role</label>
+            <select id="role" name="role">
+              <option value="Employee" selected>Employee</option>
+              <option value="Manager">Manager</option>
+              <option value="Admin">Admin</option>
+            </select>
+            <div class="hint">An Admin must approve any role above Employee.</div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block mt-8" id="register-btn">
+          <span id="register-btn-label">Create Account</span>
+          <span id="register-spinner" class="spinner" style="display:none;"></span>
+        </button>
+      </form>
+
+      <p class="mt-16" style="text-align:center; font-size: 13.5px;">
+        Already have an account? <a href="/">Log in</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/register.js"></script>
+</body>
+</html>

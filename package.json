@@ -1,0 +1,16 @@
+{
+  "name": "secureflow",
+  "version": "1.0.0",
+  "description": "SecureFlow — User Management & Storage System (academic software testing project)",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "seed:reset": "node src/reset.js"
+  },
+  "license": "MIT",
+  "dependencies": {}
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SecureFlow — Admin Dashboard</title>
+<link rel="stylesheet" href="/css/styles.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-mount"></aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <div class="eyebrow" id="page-eyebrow">Admin Dashboard</div>
+          <h1 id="page-title">Overview</h1>
+          <div class="subtitle" id="page-subtitle">Organization-wide user management at a glance.</div>
+        </div>
+      </div>
+
+      <div class="row gap-8 mb-16" id="tab-bar"></div>
+
+      <div id="tab-overview">
+        <div class="grid grid-4" id="overview-cards"></div>
+
+        <div class="grid grid-2 mt-24" style="align-items: start;">
+          <div class="card">
+            <div class="section-title">Recent Registrations</div>
+            <div id="recent-registrations"></div>
+          </div>
+          <div class="card">
+            <div class="section-title">Recent Verification Activity</div>
+            <div id="recent-activity"></div>
+          </div>
+        </div>
+
+        <div class="card mt-24">
+          <div class="section-title">Role Distribution</div>
+          <div id="role-distribution"></div>
+        </div>
+      </div>
+
+      <div id="tab-users" style="display:none;">
+        <div class="card">
+          <div class="row-between mb-16">
+            <div class="section-title" style="margin-bottom:0;">All Users</div>
+            <select id="users-filter" style="width:auto;">
+              <option value="">All statuses</option>
+              <option value="pending">Pending verification</option>
+              <option value="verified">Verified</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="table-wrap"><table id="users-table">
+            <thead><tr><th>Name</th><th>Employee ID</th><th>Email</th><th>Role</th><th>Verification</th><th>Account</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <div id="tab-verification" style="display:none;">
+        <div class="card">
+          <div class="section-title">Employee Verification</div>
+          <p class="text-muted mb-16" style="font-size:13px;">Newly registered users awaiting review. Verify to activate their account, or reject to disable it.</p>
+          <div class="table-wrap"><table id="verification-table">
+            <thead><tr><th>Name</th><th>Employee ID</th><th>Email</th><th>Department</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <div id="tab-roles" style="display:none;">
+        <div class="card">
+          <div class="section-title">Role Management</div>
+          <p class="text-muted mb-16" style="font-size:13px;">Assign Employee, Manager, or Admin roles. Changes are enforced immediately by the server on every subsequent request.</p>
+          <div class="table-wrap"><table id="roles-table">
+            <thead><tr><th>Name</th><th>Username</th><th>Current Role</th><th>Account</th><th>Change Role</th><th>Status</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <div id="tab-employees" style="display:none;">
+        <div class="card">
+          <div class="section-title">Employees</div>
+          <p class="text-muted mb-16" style="font-size:13px;">Employee accounts visible to your Manager role.</p>
+          <div class="table-wrap"><table id="employees-table">
+            <thead><tr><th>Name</th><th>Employee ID</th><th>Department</th><th>Account</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
