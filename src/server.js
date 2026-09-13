@@ -11,6 +11,8 @@ import { registerPageRoutes, PUBLIC_DIR } from './routes/pageRoutes.js';
 import { setBaseUrl } from './testRunner.js';
 
 const PORT = Number(process.env.PORT) || 4000;
+// 0.0.0.0 so the process accepts connections from outside the container
+// (required by Render and most other hosts) instead of only loopback.
 const HOST = process.env.HOST || '0.0.0.0';
 
 const router = new Router();
@@ -48,7 +50,7 @@ export function createServer() {
   return http.createServer((req, res) => {
     const url = new URL(
       req.url,
-      `http://${req.headers.host || 'localhost'}`
+      `http://${req.headers.host || 'localhost'}`,
     );
 
     const pathname = url.pathname;
@@ -69,13 +71,11 @@ export function createServer() {
 const server = createServer();
 
 server.listen(PORT, HOST, () => {
+  // The server BINDS to HOST (0.0.0.0 in production), but the automated
+  // Test Runner makes its own loopback requests to itself -- those always
+  // go through 127.0.0.1, since 0.0.0.0 is not a connectable address.
   setBaseUrl(`http://127.0.0.1:${PORT}`);
 
-  console.log(
-    `SecureFlow running at http://${HOST}:${PORT}`
-  );
-
-  console.log(
-    'Seeded accounts: admin / manager / employee / pending / rejected (see README for passwords).'
-  );
+  console.log(`SecureFlow running at http://${HOST}:${PORT}`);
+  console.log('Seeded accounts: admin / manager / employee / pending / rejected (see README for passwords).');
 });

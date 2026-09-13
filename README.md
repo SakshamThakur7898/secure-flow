@@ -85,12 +85,23 @@ Seeded accounts: admin / manager / employee / pending / rejected (see README for
 ```
 Open **http://127.0.0.1:4000** in your browser.
 
-On Windows specifically: use PowerShell, Command Prompt, or Windows Terminal
-— all work the same way, since the project has no OS-specific dependencies
-or native modules to compile.
+### On Windows specifically
+use PowerShell, Command Prompt, or Windows Terminal — all work the same
+way, since the project has no OS-specific dependencies or native modules
+to compile.
 
 To change the port: `set PORT=5000 && npm start` (Windows) or
 `PORT=5000 npm start` (macOS/Linux).
+
+### Deploying (e.g. Render, or any Node host)
+`src/server.js` binds to `0.0.0.0` by default (override with the `HOST`
+env var) so the process accepts external connections, while the Testing
+Dashboard's self-tests always talk to `127.0.0.1` internally — the two
+are independent on purpose. The database location can be overridden with
+`DATA_DIR` (e.g. `DATA_DIR=/var/data`) if your host gives you a
+persistent disk; without it, it defaults to `./data/secureflow.sqlite` as
+before. Typical Render settings: Runtime `Node`, Build Command
+`npm install`, Start Command `npm start` (no build step needed).
 
 ### Resetting the database
 The database lives at `data/secureflow.sqlite` and is created automatically

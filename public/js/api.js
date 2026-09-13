@@ -126,6 +126,44 @@ const SecureFlow = (() => {
       </div>
     `;
     document.getElementById('logout-btn').addEventListener('click', logout);
+    injectMobileNav();
+    // On mobile, tapping any nav link (or a hash-only jump to the same
+    // page, which won't trigger a fresh page load) should close the drawer.
+    mount.querySelectorAll('.nav-link').forEach((a) => a.addEventListener('click', closeMobileNav));
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  // ---------------------------------------------------------------------
+  // Mobile navigation: a hamburger topbar + slide-in drawer, built once
+  // and reused by every page that has a <aside class="sidebar">
+  // (Dashboard, Admin, Testing). Desktop screens never see any of this
+  // -- it's hidden entirely by CSS above the 860px breakpoint.
+  // ---------------------------------------------------------------------
+  function closeMobileNav() {
+    document.body.classList.remove('sidebar-open');
+  }
+  function injectMobileNav() {
+    if (!document.querySelector('.mobile-topbar')) {
+      const topbar = document.createElement('div');
+      topbar.className = 'mobile-topbar';
+      topbar.innerHTML = `
+        <button class="sidebar-toggle" id="sidebar-toggle-btn" aria-label="Open menu">
+          <i data-lucide="menu" style="width:18px;height:18px"></i>
+        </button>
+        <div class="brand-mark">SF</div>
+        <div class="brand-name">SecureFlow</div>
+      `;
+      document.body.insertBefore(topbar, document.body.firstChild);
+      topbar.querySelector('#sidebar-toggle-btn').addEventListener('click', () => {
+        document.body.classList.toggle('sidebar-open');
+      });
+    }
+    if (!document.querySelector('.sidebar-backdrop')) {
+      const backdrop = document.createElement('div');
+      backdrop.className = 'sidebar-backdrop';
+      backdrop.addEventListener('click', closeMobileNav);
+      document.body.appendChild(backdrop);
+    }
     if (window.lucide) window.lucide.createIcons();
   }
 
