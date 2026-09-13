@@ -1,0 +1,9 @@
+# selenium_tests/requirements.txt
+# Selenium 4.11+ so that Selenium Manager (automatic chromedriver
+# resolution) is available and stable.
+selenium>=4.15
+pytest>=7.4
+# Optional: only used so SELENIUM_BASE_URL / SELENIUM_HEADLESS / etc. can
+# be set in a local .env file instead of exported in your shell every
+# time. The suite works fine without it, using plain environment variables.
+python-dotenv>=1.0

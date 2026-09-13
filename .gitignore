@@ -1,0 +1,13 @@
+node_modules/
+data/*.sqlite
+data/*.sqlite-*
+*.log
+.DS_Store
+
+# Selenium test suite (Practical 2)
+selenium_tests/venv/
+selenium_tests/.env
+selenium_tests/screenshots/*.png
+selenium_tests/__pycache__/
+selenium_tests/**/__pycache__/
+.pytest_cache/

@@ -1,0 +1,148 @@
+# selenium_tests/pages.py
+# -----------------------------------------------------------------------
+# A deliberately small Page Object Model. Each class wraps the *actual*
+# element IDs from the SecureFlow frontend (public/index.html,
+# public/register.html, the sidebar injected by public/js/api.js, etc.)
+# so tests read like user actions instead of raw find_element calls, and
+# a future markup tweak only needs a fix in one place.
+# -----------------------------------------------------------------------
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+import config
+
+
+class BasePage:
+    def __init__(self, driver):
+        self.driver = driver
+        self.wait = WebDriverWait(driver, config.EXPLICIT_TIMEOUT)
+
+    @property
+    def current_path(self):
+        """The path portion of the current URL, e.g. '/dashboard'."""
+        url = self.driver.current_url
+        return url[len(config.BASE_URL):] or "/"
+
+
+class LoginPage(BasePage):
+    """public/index.html — the '/' route."""
+
+    def open(self):
+        self.driver.get(f"{config.BASE_URL}/")
+        self.wait.until(EC.presence_of_element_located((By.ID, "login-form")))
+        return self
+
+    def is_displayed(self):
+        return len(self.driver.find_elements(By.ID, "login-form")) > 0
+
+    def login(self, identifier, password):
+        self.driver.find_element(By.ID, "identifier").clear()
+        self.driver.find_element(By.ID, "identifier").send_keys(identifier)
+        self.driver.find_element(By.ID, "password").clear()
+        self.driver.find_element(By.ID, "password").send_keys(password)
+        self.driver.find_element(By.ID, "login-btn").click()
+        return self
+
+    def wait_for_error(self):
+        """Waits for and returns the text of the login error alert."""
+        el = self.wait.until(EC.visibility_of_element_located((By.ID, "alert-error")))
+        return el.text
+
+    def wait_for_redirect_away(self):
+        """Used after a valid login: waits until we've left the login page
+        and landed on either /dashboard (Employee) or /admin (Manager/Admin)."""
+        self.wait.until(lambda d: "/dashboard" in d.current_url or "/admin" in d.current_url)
+        return self
+
+
+class RegisterPage(BasePage):
+    """public/register.html — the '/register' route."""
+
+    FIELDS = ["fullName", "username", "email", "password", "confirmPassword", "employeeId", "department", "phone"]
+
+    def open(self):
+        self.driver.get(f"{config.BASE_URL}/register")
+        self.wait.until(EC.presence_of_element_located((By.ID, "register-form")))
+        return self
+
+    def fill_and_submit(self, **values):
+        for field in self.FIELDS:
+            if field in values:
+                el = self.driver.find_element(By.ID, field)
+                el.clear()
+                el.send_keys(values[field])
+        self.driver.find_element(By.ID, "register-btn").click()
+        return self
+
+    def wait_for_success(self):
+        el = self.wait.until(EC.visibility_of_element_located((By.ID, "alert-success")))
+        return el.text
+
+    def wait_for_error(self):
+        el = self.wait.until(EC.visibility_of_element_located((By.ID, "alert-error")))
+        return el.text
+
+
+class SidebarPage(BasePage):
+    """The sidebar injected by public/js/api.js on every logged-in page
+    (Dashboard, Admin, Testing) -- notably the #logout-btn."""
+
+    def logout(self):
+        logout_btn = self.wait.until(EC.element_to_be_clickable((By.ID, "logout-btn")))
+        logout_btn.click()
+        return self
+
+    def wait_for_logged_out(self):
+        self.wait.until(EC.presence_of_element_located((By.ID, "login-form")))
+        return self
+
+
+class DashboardPage(BasePage):
+    """public/dashboard.html — the '/dashboard' route."""
+
+    def wait_until_loaded(self):
+        self.wait.until(EC.text_to_be_present_in_element((By.ID, "welcome-heading"), "Welcome"))
+        return self
+
+    def welcome_text(self):
+        return self.driver.find_element(By.ID, "welcome-heading").text
+
+
+class AdminPage(BasePage):
+    """public/admin.html — the '/admin' route."""
+
+    def wait_until_loaded(self):
+        self.wait.until(EC.text_to_be_present_in_element((By.ID, "page-eyebrow"), "Dashboard"))
+        return self
+
+    def eyebrow_text(self):
+        return self.driver.find_element(By.ID, "page-eyebrow").text
+
+    def open_users_tab(self):
+        self.driver.find_element(By.CSS_SELECTOR, '[data-tab="users"]').click()
+        self.wait.until(EC.visibility_of_element_located((By.ID, "tab-users")))
+        return self
+
+    def delete_user_by_username(self, username):
+        """Finds the row containing `username` in the Users table and
+        clicks its Delete button, then confirms the app's own confirmation
+        dialog (SecureFlow.confirmDialog, rendered with these exact IDs)."""
+        row_xpath = f'//table[@id="users-table"]//tr[.//*[contains(text(), "{username}")]]'
+        row = self.wait.until(EC.presence_of_element_located((By.XPATH, row_xpath)))
+        delete_btn = row.find_element(By.CSS_SELECTOR, "[data-delete]")
+        delete_btn.click()
+
+        confirm_btn = self.wait.until(EC.element_to_be_clickable((By.ID, "sf-confirm-yes")))
+        confirm_btn.click()
+        # Row should disappear once the delete completes and the table reloads.
+        self.wait.until(EC.staleness_of(row))
+        return self
+
+
+class AccessDeniedPage(BasePage):
+    """public/access-denied.html — served (with HTTP 403) whenever a
+    non-Admin tries to load /admin or /testing directly."""
+
+    def is_displayed(self):
+        return len(self.driver.find_elements(By.CLASS_NAME, "access-denied-shell")) > 0
