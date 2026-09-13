@@ -364,6 +364,54 @@ tr:last-child td { border-bottom: none; }
   display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0;
 }
 .access-denied-shell { text-align: center; max-width: 460px; }
+
+/* ---------------------------------------------------------------- */
+/* Modal (Edit Profile)                                               */
+/* ---------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(20, 24, 42, 0.45);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+  z-index: 50; animation: fade-in 0.15s ease;
+}
+.modal-overlay.show { display: flex; }
+.modal-card {
+  background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 460px; padding: 26px 28px; max-height: 90vh; overflow-y: auto;
+  animation: page-enter 0.2s ease both;
+}
+.modal-card h3 { font-size: 17px; margin-bottom: 4px; }
+.modal-card .modal-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; }
+
+/* ---------------------------------------------------------------- */
+/* Notification bell + dropdown                                      */
+/* ---------------------------------------------------------------- */
+.notif-wrap { position: relative; }
+.notif-bell {
+  position: relative; width: 38px; height: 38px; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+}
+.notif-bell:hover { background: var(--bg); }
+.notif-badge {
+  position: absolute; top: -5px; right: -5px; min-width: 17px; height: 17px; padding: 0 4px;
+  border-radius: 999px; background: var(--red-500); color: white; font-size: 10.5px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; animation: scale-in 0.2s ease;
+}
+.notif-panel {
+  position: absolute; top: calc(100% + 8px); right: 0; width: 340px; max-height: 400px; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg); display: none; z-index: 40; animation: page-enter 0.15s ease both;
+}
+.notif-panel.show { display: block; }
+.notif-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.notif-panel-header .title { font-weight: 700; font-size: 13.5px; }
+.notif-item { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-start; }
+.notif-item:last-child { border-bottom: none; }
+.notif-item.unread { background: var(--indigo-50); }
+.notif-item .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--indigo-500); margin-top: 6px; flex-shrink: 0; }
+.notif-item .dot.read { background: transparent; }
+.notif-item-text { font-size: 13px; flex: 1; }
+.notif-item-time { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; }
 .access-denied-icon {
   width: 64px; height: 64px; border-radius: 16px; background: var(--red-50); color: var(--red-500);
   display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px;

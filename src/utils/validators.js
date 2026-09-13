@@ -55,4 +55,16 @@ export function passwordStrength(password = '') {
   return { score, label: labels[score] };
 }
 
+export function validateProfileUpdate(body) {
+  const errors = {};
+  const { fullName, email, department } = body || {};
+
+  if (!fullName || !fullName.trim()) errors.fullName = 'Full name is required.';
+  if (!email || !email.trim()) errors.email = 'Email is required.';
+  else if (!EMAIL_RE.test(email)) errors.email = 'Please enter a valid email.';
+  if (!department || !department.trim()) errors.department = 'Department is required.';
+
+  return { valid: Object.keys(errors).length === 0, errors };
+}
+
 export const ROLES = ['Employee', 'Manager', 'Admin'];

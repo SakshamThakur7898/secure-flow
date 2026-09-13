@@ -3,12 +3,9 @@
     return `<div class="stat-icon" style="background:${color}1a; color:${color};"><i data-lucide="${name}" style="width:17px;height:17px"></i></div>`;
   }
 
-  async function init() {
-    const user = await SecureFlow.requireUser();
-    if (!user) return;
+  let CURRENT_USER = null;
 
-    SecureFlow.renderSidebar('/dashboard', user);
-
+  function renderProfile(user) {
     document.getElementById('welcome-heading').textContent = `Welcome, ${user.fullName}`;
 
     document.getElementById('status-cards').innerHTML = `
@@ -52,6 +49,94 @@
     `).join('');
 
     if (window.lucide) window.lucide.createIcons();
+  }
+
+  function setupEditModal() {
+    const modal = document.getElementById('edit-profile-modal');
+    const form = document.getElementById('edit-profile-form');
+    const alertError = document.getElementById('edit-alert-error');
+    const alertSuccess = document.getElementById('edit-alert-success');
+    const saveBtn = document.getElementById('edit-save-btn');
+    const saveLabel = document.getElementById('edit-save-label');
+    const saveSpinner = document.getElementById('edit-save-spinner');
+
+    function openModal() {
+      SecureFlow.hideAlert(alertError);
+      SecureFlow.hideAlert(alertSuccess);
+      SecureFlow.clearFieldErrors(form);
+      document.getElementById('edit-fullName').value = CURRENT_USER.fullName;
+      document.getElementById('edit-email').value = CURRENT_USER.email;
+      document.getElementById('edit-phone').value = CURRENT_USER.phone || '';
+      document.getElementById('edit-department').value = CURRENT_USER.department;
+      modal.classList.add('show');
+    }
+    function closeModal() { modal.classList.remove('show'); }
+
+    document.getElementById('edit-profile-btn').addEventListener('click', openModal);
+    document.getElementById('edit-cancel-btn').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      SecureFlow.hideAlert(alertError);
+      SecureFlow.hideAlert(alertSuccess);
+      SecureFlow.clearFieldErrors(form);
+
+      const fullName = document.getElementById('edit-fullName');
+      const email = document.getElementById('edit-email');
+      const department = document.getElementById('edit-department');
+      const phone = document.getElementById('edit-phone');
+
+      let hasError = false;
+      if (!fullName.value.trim()) { SecureFlow.fieldError(fullName, 'Full name is required.'); hasError = true; }
+      if (!email.value.trim()) { SecureFlow.fieldError(email, 'Email is required.'); hasError = true; }
+      if (!department.value.trim()) { SecureFlow.fieldError(department, 'Department is required.'); hasError = true; }
+      if (hasError) return;
+
+      saveBtn.disabled = true;
+      saveSpinner.style.display = 'inline-block';
+      saveLabel.textContent = 'Saving…';
+
+      const { ok, data } = await SecureFlow.apiFetch('/api/auth/profile', {
+        method: 'POST',
+        body: {
+          fullName: fullName.value.trim(),
+          email: email.value.trim(),
+          phone: phone.value.trim(),
+          department: department.value.trim(),
+        },
+      });
+
+      saveBtn.disabled = false;
+      saveSpinner.style.display = 'none';
+      saveLabel.textContent = 'Save Changes';
+
+      if (!ok) {
+        SecureFlow.showAlert(alertError, 'error', data.error || 'Could not save changes.');
+        if (data.fieldErrors) {
+          Object.entries(data.fieldErrors).forEach(([name, msg]) => {
+            const input = document.getElementById(`edit-${name}`);
+            if (input) SecureFlow.fieldError(input, msg);
+          });
+        }
+        return;
+      }
+
+      CURRENT_USER = data.user;
+      renderProfile(CURRENT_USER);
+      SecureFlow.showAlert(alertSuccess, 'success', data.message);
+      setTimeout(closeModal, 900);
+    });
+  }
+
+  async function init() {
+    const user = await SecureFlow.requireUser();
+    if (!user) return;
+    CURRENT_USER = user;
+
+    SecureFlow.renderSidebar('/dashboard', user);
+    renderProfile(user);
+    setupEditModal();
   }
 
   init();

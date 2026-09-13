@@ -5,6 +5,7 @@ import { ROLES } from '../utils/validators.js';
 import {
   listUsers, findUserById, setVerification, setRole, setAccountStatus,
   toSafeUser, logVerificationAction, recentVerificationActivity, db,
+  listNotifications, countUnacknowledgedNotifications, acknowledgeNotification, acknowledgeAllNotifications,
 } from '../db.js';
 
 // ---------------------------------------------------------------------
@@ -111,5 +112,23 @@ export function registerAdminRoutes(router) {
   router.get('/api/manager/employees', requireRole('Manager', 'Admin'), async (req, res) => {
     const employees = listUsers().filter((u) => u.role === 'Employee').map(toSafeUser);
     return sendJson(res, 200, { employees });
+  });
+
+  // ---- Notifications (Admin-only) ---------------------------------------
+  // A "simple notification" trail of self-service profile edits, so an
+  // Admin can see at a glance when a user has changed their own details.
+  router.get('/api/admin/notifications', requireRole('Admin'), async (req, res) => {
+    return sendJson(res, 200, {
+      notifications: listNotifications(30),
+      unreadCount: countUnacknowledgedNotifications(),
+    });
+  });
+  router.post('/api/admin/notifications/:id/ack', requireRole('Admin'), async (req, res) => {
+    acknowledgeNotification(Number(req.params.id));
+    return sendJson(res, 200, { message: 'Notification dismissed.' });
+  });
+  router.post('/api/admin/notifications/ack-all', requireRole('Admin'), async (req, res) => {
+    acknowledgeAllNotifications();
+    return sendJson(res, 200, { message: 'All notifications dismissed.' });
   });
 }

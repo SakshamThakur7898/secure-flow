@@ -12,5 +12,7 @@
     "seed:reset": "node src/reset.js"
   },
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "serverless-http": "^4.0.0"
+  }
 }

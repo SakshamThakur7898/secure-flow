@@ -31,10 +31,52 @@
       </div>
 
       <div class="card mt-24">
-        <div class="section-title">Profile</div>
+        <div class="row-between mb-16">
+          <div class="section-title" style="margin-bottom:0;">Profile</div>
+          <button class="btn btn-sm btn-secondary" id="edit-profile-btn">
+            <i data-lucide="pencil" style="width:14px;height:14px"></i>Edit Profile
+          </button>
+        </div>
         <div class="grid grid-2" id="profile-grid"></div>
       </div>
     </main>
+  </div>
+
+  <div class="modal-overlay" id="edit-profile-modal">
+    <div class="modal-card">
+      <h3>Edit Profile</h3>
+      <div class="modal-subtitle">Username and Employee ID are managed by an Administrator and can't be changed here.</div>
+      <div class="alert alert-error" id="edit-alert-error"></div>
+      <div class="alert alert-success" id="edit-alert-success"></div>
+      <form id="edit-profile-form" novalidate>
+        <div class="field">
+          <label for="edit-fullName">Full Name</label>
+          <input id="edit-fullName" type="text" />
+          <div class="field-error"></div>
+        </div>
+        <div class="field">
+          <label for="edit-email">Email</label>
+          <input id="edit-email" type="email" />
+          <div class="field-error"></div>
+        </div>
+        <div class="field">
+          <label for="edit-phone">Phone Number <span class="text-faint">(optional)</span></label>
+          <input id="edit-phone" type="tel" />
+        </div>
+        <div class="field">
+          <label for="edit-department">Department</label>
+          <input id="edit-department" type="text" />
+          <div class="field-error"></div>
+        </div>
+        <div class="row gap-8 mt-8">
+          <button type="submit" class="btn btn-primary" id="edit-save-btn">
+            <span id="edit-save-label">Save Changes</span>
+            <span id="edit-save-spinner" class="spinner" style="display:none;"></span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="edit-cancel-btn">Cancel</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script src="/js/api.js"></script>

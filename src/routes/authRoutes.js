@@ -1,9 +1,9 @@
 // src/routes/authRoutes.js
 import { sendJson, readJsonBody } from '../utils/http.js';
-import { validateRegistration, validateLogin } from '../utils/validators.js';
+import { validateRegistration, validateLogin, validateProfileUpdate } from '../utils/validators.js';
 import {
   findUserByIdentifier, usernameExists, emailExists, createUser,
-  toSafeUser, touchLastLogin,
+  toSafeUser, touchLastLogin, emailExistsForOtherUser, updateOwnProfile, insertProfileUpdateLog,
 } from '../db.js';
 import { hashPassword, verifyPassword } from '../auth.js';
 import { createSession, destroySession, sessionCookieHeader, parseCookies, SESSION_COOKIE, getUserForToken } from '../sessions.js';
@@ -92,6 +92,51 @@ export function registerAuthRoutes(router) {
     const user = getUserForToken(cookies[SESSION_COOKIE]);
     if (!user) return sendJson(res, 401, { error: 'Not authenticated.' });
     return sendJson(res, 200, { user: toSafeUser(user) });
+  });
+
+  // ---- POST /api/auth/profile — self-service edit of one's own details ----
+  // Any logged-in user (Employee, Manager, or Admin) can update their own
+  // fullName / email / phone / department. Username, employeeId, role,
+  // verificationStatus and accountStatus are intentionally NOT editable
+  // here -- those stay under Admin control. Every successful change is
+  // logged to profile_update_log, which powers the Admin notification bell.
+  router.post('/api/auth/profile', async (req, res) => {
+    const cookies = parseCookies(req.headers.cookie);
+    const user = getUserForToken(cookies[SESSION_COOKIE]);
+    if (!user) return sendJson(res, 401, { error: 'You must be logged in.' });
+
+    let body;
+    try { body = await readJsonBody(req); }
+    catch { return sendJson(res, 400, { error: 'Invalid request body.' }); }
+
+    const { valid, errors } = validateProfileUpdate(body);
+    if (!valid) return sendJson(res, 400, { error: 'Please fix the highlighted fields.', fieldErrors: errors });
+
+    const email = body.email.trim().toLowerCase();
+    if (email !== user.email && emailExistsForOtherUser(email, user.id)) {
+      return sendJson(res, 409, { error: 'An account with this email already exists.', fieldErrors: { email: 'Email already exists.' } });
+    }
+
+    const next = {
+      fullName: body.fullName.trim(),
+      email,
+      phone: body.phone ? body.phone.trim() : null,
+      department: body.department.trim(),
+    };
+
+    const changedFields = [];
+    if (next.fullName !== user.fullName) changedFields.push('name');
+    if (next.email !== user.email) changedFields.push('email');
+    if ((next.phone || '') !== (user.phone || '')) changedFields.push('phone');
+    if (next.department !== user.department) changedFields.push('department');
+
+    const updated = updateOwnProfile(user.id, next);
+
+    if (changedFields.length > 0) {
+      insertProfileUpdateLog(user.id, changedFields);
+      return sendJson(res, 200, { message: 'Profile updated successfully.', user: toSafeUser(updated) });
+    }
+    return sendJson(res, 200, { message: 'No changes to save.', user: toSafeUser(updated) });
   });
 }
 

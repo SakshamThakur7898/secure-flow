@@ -161,7 +161,25 @@ block, and `rejected` to demonstrate the rejected-account login block.
 
 ---
 
-## 7. Testing requirements & the Testing Dashboard (`/testing`, Admin-only)
+## 7. Self-service profile editing & Admin notifications
+
+- **Edit Profile** (User Dashboard → "Edit Profile" button) — any logged-in
+  user can update their own `fullName`, `email`, `phone`, and `department`.
+  `username`, `employeeId`, `role`, and both status fields stay
+  Admin-controlled and are not editable here. Email uniqueness is checked
+  server-side on every save (`POST /api/auth/profile`).
+- **Admin notification bell** (top-right of `/admin`) — every time a user
+  successfully changes one or more of those fields, a row is written to
+  `profile_update_log` (see `src/db.js`) naming exactly which fields
+  changed. The bell badge shows the unread count; clicking it opens a
+  panel listing each change (e.g. "Jane E. Employee updated their email,
+  phone."), with **Dismiss** per item or **Mark all read**. Backed by
+  `GET/POST /api/admin/notifications*` in `src/routes/adminRoutes.js` —
+  Admin-only, like everything else under `/api/admin`.
+
+---
+
+## 8. Testing requirements & the Testing Dashboard (`/testing`, Admin-only)
 
 ### What makes these tests "real" and not fake green checkmarks
 Every one of the 5 automated tests (`src/testRunner.js`) makes **actual HTTP
@@ -224,7 +242,7 @@ descriptive reason.
 
 ---
 
-## 8. Test cases
+## 9. Test cases
 
 See **[`TEST_CASES.md`](./TEST_CASES.md)** for the full structured test
 case list (TC-001 through TC-015): each with Test ID, Requirement,
@@ -233,7 +251,7 @@ and which of the 5 automated Testing Dashboard checks covers it.
 
 ---
 
-## 9. Project structure
+## 10. Project structure
 
 ```
 secureflow/
@@ -264,7 +282,7 @@ secureflow/
 
 ---
 
-## 10. Security notes
+## 11. Security notes
 - Passwords: salted `scrypt`, timing-safe compare, never logged or returned
   by any API (`toSafeUser()` strips `passwordHash` before every response).
 - Sessions: random 256-bit tokens in an `HttpOnly`, `SameSite=Lax` cookie;

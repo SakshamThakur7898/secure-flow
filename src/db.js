@@ -15,7 +15,9 @@ import fs from 'node:fs';
 import { hashPassword } from './auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, '..', 'data');
+const DATA_DIR =
+  process.env.DATA_DIR || path.join(__dirname, '..', 'data');
+
 const DB_PATH = path.join(DATA_DIR, 'secureflow.sqlite');
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -70,6 +72,15 @@ db.exec(`
     errorMessage  TEXT,
     durationMs    INTEGER,
     timestamp     TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS profile_update_log (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId        INTEGER NOT NULL,
+    changedFields TEXT NOT NULL, -- comma-separated, e.g. "email, phone"
+    timestamp     TEXT NOT NULL,
+    acknowledged  INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
   );
 `);
 
@@ -220,6 +231,42 @@ export function touchLastLogin(id) {
   const now = new Date().toISOString();
   db.prepare('UPDATE users SET lastLogin = ?, updatedAt = ? WHERE id = ?').run(now, now, id);
 }
+
+// ---------------------------------------------------------------------
+// Self-service profile edits + the resulting Admin notification.
+// ---------------------------------------------------------------------
+export function emailExistsForOtherUser(email, excludeId) {
+  return !!db.prepare('SELECT id FROM users WHERE email = ? AND id != ?').get(email, excludeId);
+}
+export function updateOwnProfile(id, { fullName, email, phone, department }) {
+  const now = new Date().toISOString();
+  db.prepare('UPDATE users SET fullName = ?, email = ?, phone = ?, department = ?, updatedAt = ? WHERE id = ?')
+    .run(fullName, email, phone || null, department, now, id);
+  return findUserById(id);
+}
+export function insertProfileUpdateLog(userId, changedFields) {
+  db.prepare('INSERT INTO profile_update_log (userId, changedFields, timestamp, acknowledged) VALUES (?,?,?,0)')
+    .run(userId, changedFields.join(', '), new Date().toISOString());
+}
+export function listNotifications(limit = 30) {
+  return db.prepare(`
+    SELECT pul.id, pul.changedFields, pul.timestamp, pul.acknowledged, u.fullName AS userName, u.id AS userId
+    FROM profile_update_log pul
+    JOIN users u ON u.id = pul.userId
+    ORDER BY pul.timestamp DESC LIMIT ?
+  `).all(limit);
+}
+export function countUnacknowledgedNotifications() {
+  const { count } = db.prepare('SELECT COUNT(*) AS count FROM profile_update_log WHERE acknowledged = 0').get();
+  return count;
+}
+export function acknowledgeNotification(id) {
+  db.prepare('UPDATE profile_update_log SET acknowledged = 1 WHERE id = ?').run(id);
+}
+export function acknowledgeAllNotifications() {
+  db.prepare('UPDATE profile_update_log SET acknowledged = 1 WHERE acknowledged = 0').run();
+}
+
 export function logVerificationAction(userId, adminId, action) {
   db.prepare('INSERT INTO verification_log (userId, adminId, action, timestamp) VALUES (?,?,?,?)')
     .run(userId, adminId, action, new Date().toISOString());

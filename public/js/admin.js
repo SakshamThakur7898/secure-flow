@@ -36,6 +36,16 @@
     if (key === 'verification') loadVerification();
     if (key === 'roles') loadRoles();
     if (key === 'employees') loadEmployees();
+
+    // Keep exactly one sidebar link highlighted, matching the visible tab
+    // (previously every /admin link lit up together, since they all share
+    // the same base path and only differ by hash).
+    document.querySelectorAll('#sidebar-mount .nav-link').forEach((a) => {
+      const [path, hash = ''] = a.getAttribute('href').split('#');
+      const isThisTab = path === '/admin' && (hash === key || (hash === '' && key === 'overview'));
+      a.classList.toggle('active', isThisTab);
+    });
+
     if (window.lucide) window.lucide.createIcons();
   }
 
@@ -221,7 +231,89 @@
     `).join('');
   }
 
+  // ---------------------------------------------------------------------
+  // Notifications — a simple bell that tells the Admin when a user has
+  // edited their own profile details (see /api/auth/profile).
+  // ---------------------------------------------------------------------
+  function relativeTime(iso) {
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const mins = Math.round(diffMs / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return SecureFlow.formatDate(iso);
+  }
+
+  async function loadNotifications() {
+    const { ok, data } = await SecureFlow.apiFetch('/api/admin/notifications');
+    if (!ok) return;
+    const badge = document.getElementById('notif-badge');
+    if (data.unreadCount > 0) { badge.style.display = 'flex'; badge.textContent = data.unreadCount > 9 ? '9+' : data.unreadCount; }
+    else { badge.style.display = 'none'; }
+
+    const list = document.getElementById('notif-list');
+    if (!data.notifications.length) {
+      list.innerHTML = `<div class="notif-item"><div class="notif-item-text text-faint">No notifications yet. You'll see one here whenever a user updates their profile details.</div></div>`;
+      return;
+    }
+    list.innerHTML = data.notifications.map((n) => `
+      <div class="notif-item ${n.acknowledged ? '' : 'unread'}">
+        <div class="dot ${n.acknowledged ? 'read' : ''}"></div>
+        <div class="notif-item-text">
+          <strong>${n.userName}</strong> updated their ${n.changedFields}.
+          <div class="notif-item-time">${relativeTime(n.timestamp)}</div>
+        </div>
+        ${n.acknowledged ? '' : `<button class="btn btn-ghost btn-sm" style="padding:4px 8px;" data-ack="${n.id}">Dismiss</button>`}
+      </div>`).join('');
+
+    list.querySelectorAll('[data-ack]').forEach((btn) => btn.addEventListener('click', async () => {
+      await SecureFlow.apiFetch(`/api/admin/notifications/${btn.dataset.ack}/ack`, { method: 'POST' });
+      loadNotifications();
+    }));
+  }
+
+  function setupNotifications() {
+    const wrap = document.getElementById('notif-wrap');
+    const bell = document.getElementById('notif-bell');
+    const panel = document.getElementById('notif-panel');
+    wrap.style.display = 'block';
+
+    bell.addEventListener('click', (e) => {
+      e.stopPropagation();
+      panel.classList.toggle('show');
+      if (panel.classList.contains('show')) loadNotifications();
+    });
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target)) panel.classList.remove('show');
+    });
+    document.getElementById('notif-clear-btn').addEventListener('click', async () => {
+      await SecureFlow.apiFetch('/api/admin/notifications/ack-all', { method: 'POST' });
+      loadNotifications();
+    });
+
+    loadNotifications();
+    // Light polling so the badge count stays fresh while the Admin is on the page.
+    setInterval(loadNotifications, 30000);
+  }
+
   document.getElementById('users-filter')?.addEventListener('change', loadUsers);
+
+  // The sidebar links point to /admin#users, /admin#verification, etc.
+  // Since we're already on /admin, clicking them only changes the URL
+  // hash (no page reload) -- so we listen for that and switch tabs
+  // ourselves, and also honor the hash on first load (e.g. a bookmark
+  // or a link from another page pointing straight at /admin#roles).
+  function tabFromHash() {
+    const key = window.location.hash.replace('#', '');
+    if (IS_ADMIN && ['overview', 'users', 'verification', 'roles'].includes(key)) return key;
+    return null;
+  }
+
+  window.addEventListener('hashchange', () => {
+    const key = tabFromHash();
+    if (key) setTab(key);
+  });
 
   async function init() {
     const user = await SecureFlow.requireUser();
@@ -232,7 +324,8 @@
 
     SecureFlow.renderSidebar('/admin', user);
     buildTabBar();
-    setTab(IS_ADMIN ? 'overview' : 'employees');
+    if (IS_ADMIN) setupNotifications();
+    setTab(tabFromHash() || (IS_ADMIN ? 'overview' : 'employees'));
   }
 
   init();
