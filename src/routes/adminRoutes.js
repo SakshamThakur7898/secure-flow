@@ -6,6 +6,7 @@ import {
   listUsers, findUserById, setVerification, setRole, setAccountStatus,
   toSafeUser, logVerificationAction, recentVerificationActivity, db,
   listNotifications, countUnacknowledgedNotifications, acknowledgeNotification, acknowledgeAllNotifications,
+  deleteUser, countAdmins,
 } from '../db.js';
 
 // ---------------------------------------------------------------------
@@ -106,6 +107,26 @@ export function registerAdminRoutes(router) {
     if (!['active', 'disabled'].includes(body.status)) return sendJson(res, 400, { error: 'Invalid status.' });
     const updated = setAccountStatus(target.id, body.status);
     return sendJson(res, 200, { message: `${target.fullName}'s account is now ${body.status}.`, user: toSafeUser(updated) });
+  });
+
+  // ---- DELETE /api/admin/users/:id  (permanent removal) -----------------
+  // Distinct from /status ("disable", which is reversible and keeps the
+  // record). This actually deletes the row -- and, since PRAGMA
+  // foreign_keys is on, cascades to that user's sessions and profile
+  // update log entries too.
+  router.delete('/api/admin/users/:id', requireRole('Admin'), async (req, res) => {
+    const target = findUserById(Number(req.params.id));
+    if (!target) return sendJson(res, 404, { error: 'User not found.' });
+
+    if (target.id === req.authUser.id) {
+      return sendJson(res, 400, { error: 'You cannot delete your own account while logged in as it.' });
+    }
+    if (target.role === 'Admin' && countAdmins() <= 1) {
+      return sendJson(res, 400, { error: 'Cannot delete the last remaining Admin account.' });
+    }
+
+    deleteUser(target.id);
+    return sendJson(res, 200, { message: `${target.fullName}'s account has been permanently deleted.` });
   });
 
   // ---- GET /api/manager/employees (Manager + Admin) --------------------

@@ -34,6 +34,51 @@ const SecureFlow = (() => {
     form.querySelectorAll('.field-error').forEach((e) => { e.classList.remove('show'); e.textContent = ''; });
   }
 
+  // Reusable Yes/No confirmation modal (styled to match the app, instead
+  // of the native browser confirm()). Returns a Promise<boolean>.
+  function confirmDialog({ title = 'Are you sure?', message = '', confirmLabel = 'Confirm', danger = false } = {}) {
+    return new Promise((resolve) => {
+      let overlay = document.getElementById('sf-confirm-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sf-confirm-overlay';
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = `
+          <div class="modal-card" style="max-width:380px;">
+            <h3 id="sf-confirm-title"></h3>
+            <div class="modal-subtitle" id="sf-confirm-message"></div>
+            <div class="row gap-8 mt-16">
+              <button class="btn" id="sf-confirm-yes"></button>
+              <button class="btn btn-secondary" id="sf-confirm-no">Cancel</button>
+            </div>
+          </div>`;
+        document.body.appendChild(overlay);
+      }
+      overlay.querySelector('#sf-confirm-title').textContent = title;
+      overlay.querySelector('#sf-confirm-message').textContent = message;
+      const yesBtn = overlay.querySelector('#sf-confirm-yes');
+      const noBtn = overlay.querySelector('#sf-confirm-no');
+      yesBtn.textContent = confirmLabel;
+      yesBtn.className = `btn ${danger ? 'btn-danger' : 'btn-primary'}`;
+      overlay.classList.add('show');
+
+      function cleanup(result) {
+        overlay.classList.remove('show');
+        yesBtn.removeEventListener('click', onYes);
+        noBtn.removeEventListener('click', onNo);
+        overlay.removeEventListener('click', onBackdrop);
+        resolve(result);
+      }
+      function onYes() { cleanup(true); }
+      function onNo() { cleanup(false); }
+      function onBackdrop(e) { if (e.target === overlay) cleanup(false); }
+
+      yesBtn.addEventListener('click', onYes);
+      noBtn.addEventListener('click', onNo);
+      overlay.addEventListener('click', onBackdrop);
+    });
+  }
+
   function initials(fullName = '') {
     return fullName.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || '').join('') || '?';
   }
@@ -170,6 +215,6 @@ const SecureFlow = (() => {
   return {
     apiFetch, showAlert, hideAlert, fieldError, clearFieldErrors, initials,
     verificationBadge, accountBadge, roleBadge, formatDate, timeOnly,
-    requireUser, logout, renderSidebar,
+    requireUser, logout, renderSidebar, confirmDialog,
   };
 })();

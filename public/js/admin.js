@@ -131,11 +131,16 @@
         <td>${SecureFlow.verificationBadge(u.verificationStatus)}</td>
         <td>${SecureFlow.accountBadge(u.accountStatus)}</td>
         <td>
-          ${u.accountStatus === 'active'
-            ? `<button class="btn btn-sm btn-secondary" data-action="disable" data-id="${u.id}">Disable</button>`
-            : u.accountStatus === 'disabled'
-              ? `<button class="btn btn-sm btn-secondary" data-action="enable" data-id="${u.id}">Enable</button>`
-              : '<span class="text-faint" style="font-size:12px;">—</span>'}
+          <div class="row gap-8">
+            ${u.accountStatus === 'active'
+              ? `<button class="btn btn-sm btn-secondary" data-action="disable" data-id="${u.id}">Disable</button>`
+              : u.accountStatus === 'disabled'
+                ? `<button class="btn btn-sm btn-secondary" data-action="enable" data-id="${u.id}">Enable</button>`
+                : ''}
+            ${u.id === CURRENT_USER.id
+              ? '<span class="text-faint" style="font-size:12px;">(you)</span>'
+              : `<button class="btn btn-sm btn-danger" data-delete="${u.id}" data-name="${u.fullName.replace(/"/g, '&quot;')}">Delete</button>`}
+          </div>
         </td>
       </tr>`).join('');
 
@@ -145,6 +150,29 @@
         btn.disabled = true;
         await SecureFlow.apiFetch(`/api/admin/users/${btn.dataset.id}/status`, { method: 'POST', body: { status } });
         loadUsers();
+      });
+    });
+
+    tbody.querySelectorAll('[data-delete]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.delete;
+        const name = btn.dataset.name;
+        const confirmed = await SecureFlow.confirmDialog({
+          title: 'Delete this user?',
+          message: `This permanently removes ${name}'s account, including their login access and history. This cannot be undone.`,
+          confirmLabel: 'Delete User',
+          danger: true,
+        });
+        if (!confirmed) return;
+        btn.disabled = true;
+        const { ok, data } = await SecureFlow.apiFetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+        if (!ok) {
+          await SecureFlow.confirmDialog({ title: 'Could not delete user', message: data.error || 'Something went wrong.', confirmLabel: 'OK' });
+          btn.disabled = false;
+          return;
+        }
+        loadUsers();
+        loadOverview();
       });
     });
   }

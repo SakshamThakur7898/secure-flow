@@ -24,6 +24,7 @@ export const db = new DatabaseSync(DB_PATH);
 
 db.exec(`
   PRAGMA journal_mode = WAL;
+  PRAGMA foreign_keys = ON;
 
   CREATE TABLE IF NOT EXISTS users (
     id                 INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -202,6 +203,10 @@ export function createUser(data) {
 }
 export function deleteUser(id) {
   db.prepare('DELETE FROM users WHERE id = ?').run(id);
+}
+export function countAdmins() {
+  const { count } = db.prepare("SELECT COUNT(*) AS count FROM users WHERE role = 'Admin'").get();
+  return count;
 }
 export function listUsers({ status } = {}) {
   if (status) {

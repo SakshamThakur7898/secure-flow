@@ -164,7 +164,12 @@ block, and `rejected` to demonstrate the rejected-account login block.
   role/last-login cards, full profile section, logout.
 - **Admin Dashboard** (`/admin`) — overview stat cards, recent
   registrations, recent verification activity, role distribution bars, full
-  user table, role management.
+  user table, role management. The **Users** tab supports both **Disable**
+  (reversible — flips `accountStatus`, the account and its history stay in
+  the database) and **Delete** (permanent — removes the row entirely, with
+  a confirmation prompt). An Admin can't delete their own account, and
+  can't delete the last remaining Admin account, so you can never lock
+  yourself out.
 - **Manager Dashboard** — Managers land on `/admin` too, but the page and
   its API calls only expose the Manager-permitted "Employees" view; Admin-
   only tabs and endpoints are invisible *and* rejected server-side if
@@ -173,7 +178,6 @@ block, and `rejected` to demonstrate the rejected-account login block.
 ---
 
 ## 7. Self-service profile editing & Admin notifications
-
 - **Edit Profile** (User Dashboard → "Edit Profile" button) — any logged-in
   user can update their own `fullName`, `email`, `phone`, and `department`.
   `username`, `employeeId`, `role`, and both status fields stay
@@ -306,3 +310,23 @@ secureflow/
 - Input validation happens both client-side (fast feedback) and
   server-side (the actual enforcement — the client-side checks are only a
   UX convenience and can't be trusted on their own).
+
+---
+
+## 12. Selenium browser-automation tests (Practical 2)
+
+A separate, external testing layer lives in `selenium_tests/` — Python +
+Selenium + pytest driving a real Chrome browser through the actual UI
+(login, registration, admin access, logout), against either your local
+server or your deployed URL. It does **not** replace or touch the
+built-in Admin `/testing` dashboard above; the two are independent.
+
+See **[`selenium_tests/README_SELENIUM.md`](./selenium_tests/README_SELENIUM.md)**
+for setup and usage. Quick start:
+```bash
+cd selenium_tests
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+pytest -v
+```
+
