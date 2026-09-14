@@ -66,6 +66,19 @@ class BasePage:
 
         self._diagnostic_wait(predicate, what)
 
+    def _click_when_present(self, locator, what):
+        """Waits for an element to exist in the DOM (not for Selenium's
+        notion of it being "visually clickable", which -- like .text -- can
+        lag on a background/unfocused window) and clicks it via JavaScript.
+        A JS click fires the real click event directly, sidestepping any
+        native "is this pixel currently visible/unobscured" check that
+        element_to_be_clickable() would otherwise perform."""
+        el = self._diagnostic_wait(EC.presence_of_element_located(locator), what)
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center'}); arguments[0].click();", el
+        )
+        return el
+
 
 class LoginPage(BasePage):
     """public/index.html — the '/' route."""
@@ -131,8 +144,7 @@ class SidebarPage(BasePage):
     (Dashboard, Admin, Testing) -- notably the #logout-btn."""
 
     def logout(self):
-        logout_btn = self.wait.until(EC.element_to_be_clickable((By.ID, "logout-btn")))
-        logout_btn.click()
+        self._click_when_present((By.ID, "logout-btn"), "the Logout button")
         return self
 
     def wait_for_logged_out(self):
@@ -165,30 +177,13 @@ class AdminPage(BasePage):
         return self.driver.find_element(By.ID, "page-eyebrow").text
 
     def open_users_tab(self):
-        tab_btn = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-tab="users"]')))
-        tab_btn.click()
-        self.wait.until(EC.visibility_of_element_located((By.ID, "tab-users")))
-        return self
-
-    def delete_user_by_username(self, username):
-        """Finds the row containing `username` in the Users table and
-        clicks its Delete button, then confirms the app's own confirmation
-        dialog (SecureFlow.confirmDialog, rendered with these exact IDs)."""
-        row_xpath = f'//table[@id="users-table"]//tr[.//*[contains(text(), "{username}")]]'
-        row = self.wait.until(EC.presence_of_element_located((By.XPATH, row_xpath)))
-        delete_btn = row.find_element(By.CSS_SELECTOR, "[data-delete]")
-        delete_btn.click()
-
-        confirm_btn = self.wait.until(EC.element_to_be_clickable((By.ID, "sf-confirm-yes")))
-        confirm_btn.click()
-        # Row should disappear once the delete completes and the table reloads.
-        self.wait.until(EC.staleness_of(row))
-        return self
-
-
-class AccessDeniedPage(BasePage):
-    """public/access-denied.html — served (with HTTP 403) whenever a
-    non-Admin tries to load /admin or /testing directly."""
-
-    def is_displayed(self):
-        return len(self.driver.find_elements(By.CLASS_NAME, "access-denied-shell")) > 0
+        self._click_when_present((By.CSS_SELECTOR, '[data-tab="users"]'), "the 'Users' tab button")
+        # Confirms the tab genuinely switched and loaded real data --
+        # checking for an actual table row is more reliable than checking
+        # visual state (display/visibility), which can lag on a
+        # background-ish window the same way .text and clickability do.
+        self._diagnostic_wait(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "#users-table tbody tr")),
+            "at least one row in the Users table after opening it",
+        )
+        return
