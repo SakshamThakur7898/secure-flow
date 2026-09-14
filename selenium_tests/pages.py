@@ -9,6 +9,7 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 import config
 
@@ -23,6 +24,29 @@ class BasePage:
         """The path portion of the current URL, e.g. '/dashboard'."""
         url = self.driver.current_url
         return url[len(config.BASE_URL):] or "/"
+
+    def _diagnostic_wait(self, condition, what):
+        """Same as self.wait.until(condition), but on timeout it raises an
+        error that tells you what the browser was ACTUALLY looking at --
+        current URL, page title, and whether an Access Denied / login page
+        was shown instead -- instead of a bare, unhelpful TimeoutException.
+        This is what you should read first when a test fails."""
+        try:
+            return self.wait.until(condition)
+        except TimeoutException:
+            url = self.driver.current_url
+            title = self.driver.title
+            has_login_form = len(self.driver.find_elements(By.ID, "login-form")) > 0
+            has_access_denied = len(self.driver.find_elements(By.CLASS_NAME, "access-denied-shell")) > 0
+            snippet = " ".join(self.driver.page_source.split())[:400]
+            raise TimeoutException(
+                f"Timed out waiting for: {what}\n"
+                f"  current_url        = {url}\n"
+                f"  title              = {title}\n"
+                f"  showing login form = {has_login_form}\n"
+                f"  showing Access Denied = {has_access_denied}\n"
+                f"  page_source (first 400 chars) = {snippet}"
+            )
 
 
 class LoginPage(BasePage):
@@ -113,7 +137,10 @@ class AdminPage(BasePage):
     """public/admin.html — the '/admin' route."""
 
     def wait_until_loaded(self):
-        self.wait.until(EC.text_to_be_present_in_element((By.ID, "page-eyebrow"), "Dashboard"))
+        self._diagnostic_wait(
+            EC.text_to_be_present_in_element((By.ID, "page-eyebrow"), "Dashboard"),
+            "'Dashboard' text in #page-eyebrow (i.e. the Admin Dashboard actually loading)",
+        )
         return self
 
     def eyebrow_text(self):
