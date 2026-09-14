@@ -190,6 +190,46 @@ class AdminPage(BasePage):
         )
         return self
 
+    def delete_user_by_username(self, username):
+    row = self._diagnostic_wait(
+        EC.presence_of_element_located(
+            (
+                By.XPATH,
+                f"//table[@id='users-table']//tbody/tr[td[contains(normalize-space(), '{username}')]]"
+            )
+        ),
+        f"user row for username '{username}'",
+    )
+
+    delete_button = row.find_element(
+        By.CSS_SELECTOR,
+        "[data-action='delete-user'], .delete-user-btn, button"
+    )
+
+    self.driver.execute_script(
+        "arguments[0].scrollIntoView({block: 'center'}); arguments[0].click();",
+        delete_button
+    )
+
+    confirm_button = self._diagnostic_wait(
+        EC.presence_of_element_located(
+            (By.ID, "sf-confirm-yes")
+        ),
+        "the confirmation button",
+    )
+
+    self.driver.execute_script(
+        "arguments[0].click();",
+        confirm_button
+    )
+
+    self._diagnostic_wait(
+        EC.staleness_of(row),
+        f"user row for '{username}' to disappear after deletion",
+    )
+
+    return self
+
 
 class AccessDeniedPage(BasePage):
     """public/access-denied.html — the access-denied page."""
@@ -202,3 +242,10 @@ class AccessDeniedPage(BasePage):
             "the Access Denied page",
         )
         return self
+
+    def is_displayed(self):
+        return len(
+            self.driver.find_elements(
+                By.CLASS_NAME, "access-denied-shell"
+            )
+        ) > 0
