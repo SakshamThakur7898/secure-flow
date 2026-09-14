@@ -186,4 +186,16 @@ class AdminPage(BasePage):
             EC.presence_of_element_located((By.CSS_SELECTOR, "#users-table tbody tr")),
             "at least one row in the Users table after opening it",
         )
-        return
+        return self
+        
+    class AccessDeniedPage(BasePage):
+    """public/access-denied.html — the access-denied page."""
+
+    def wait_until_loaded(self):
+        self._diagnostic_wait(
+            EC.presence_of_element_located(
+                (By.CLASS_NAME, "access-denied-shell")
+            ),
+            "the Access Denied page",
+        )
+        return self
