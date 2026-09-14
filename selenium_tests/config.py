@@ -32,6 +32,7 @@ BASE_URL = os.environ.get("SELENIUM_BASE_URL", "http://127.0.0.1:4000").rstrip("
 # "false" by default so the browser opens normally for a live classroom
 # demo, as requested.
 HEADLESS = os.environ.get("SELENIUM_HEADLESS", "false").strip().lower() in ("1", "true", "yes", "on")
+BROWSER = os.environ.get("SELENIUM_BROWSER", "chrome").strip().lower()
 
 # How long (seconds) WebDriverWait will wait for an element/condition
 # before giving up. A deployed free-tier host can be slow to wake up

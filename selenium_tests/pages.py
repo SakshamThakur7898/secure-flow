@@ -48,6 +48,24 @@ class BasePage:
                 f"  page_source (first 400 chars) = {snippet}"
             )
 
+    def _wait_for_text_content(self, element_id, expected_text, what):
+        """Like _diagnostic_wait, but checks the element's actual DOM
+        `textContent` via JS instead of Selenium's `.text` property.
+        `.text` only counts text Selenium considers "visibly rendered" at
+        that exact instant, which can lag behind reality on a background/
+        unfocused browser window (Firefox in particular throttles
+        rendering for windows without OS focus -- easy to hit when a
+        script opens a new browser window per test back-to-back).
+        textContent reads the real DOM value regardless of paint timing,
+        which is what these tests actually care about."""
+        def predicate(driver):
+            els = driver.find_elements(By.ID, element_id)
+            if not els:
+                return False
+            return expected_text in (els[0].get_attribute("textContent") or "")
+
+        self._diagnostic_wait(predicate, what)
+
 
 class LoginPage(BasePage):
     """public/index.html — the '/' route."""
@@ -126,7 +144,7 @@ class DashboardPage(BasePage):
     """public/dashboard.html — the '/dashboard' route."""
 
     def wait_until_loaded(self):
-        self.wait.until(EC.text_to_be_present_in_element((By.ID, "welcome-heading"), "Welcome"))
+        self._wait_for_text_content("welcome-heading", "Welcome", "'Welcome' text in #welcome-heading")
         return self
 
     def welcome_text(self):
@@ -137,8 +155,8 @@ class AdminPage(BasePage):
     """public/admin.html — the '/admin' route."""
 
     def wait_until_loaded(self):
-        self._diagnostic_wait(
-            EC.text_to_be_present_in_element((By.ID, "page-eyebrow"), "Dashboard"),
+        self._wait_for_text_content(
+            "page-eyebrow", "Dashboard",
             "'Dashboard' text in #page-eyebrow (i.e. the Admin Dashboard actually loading)",
         )
         return self
@@ -147,7 +165,8 @@ class AdminPage(BasePage):
         return self.driver.find_element(By.ID, "page-eyebrow").text
 
     def open_users_tab(self):
-        self.driver.find_element(By.CSS_SELECTOR, '[data-tab="users"]').click()
+        tab_btn = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-tab="users"]')))
+        tab_btn.click()
         self.wait.until(EC.visibility_of_element_located((By.ID, "tab-users")))
         return self
 
