@@ -177,18 +177,21 @@ class AdminPage(BasePage):
         return self.driver.find_element(By.ID, "page-eyebrow").text
 
     def open_users_tab(self):
-        self._click_when_present((By.CSS_SELECTOR, '[data-tab="users"]'), "the 'Users' tab button")
-        # Confirms the tab genuinely switched and loaded real data --
-        # checking for an actual table row is more reliable than checking
-        # visual state (display/visibility), which can lag on a
-        # background-ish window the same way .text and clickability do.
+        self._click_when_present(
+            (By.CSS_SELECTOR, '[data-tab="users"]'),
+            "the 'Users' tab button"
+        )
+
         self._diagnostic_wait(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "#users-table tbody tr")),
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "#users-table tbody tr")
+            ),
             "at least one row in the Users table after opening it",
         )
         return self
-        
-    class AccessDeniedPage(BasePage):
+
+
+class AccessDeniedPage(BasePage):
     """public/access-denied.html — the access-denied page."""
 
     def wait_until_loaded(self):
