@@ -174,7 +174,13 @@ class AdminPage(BasePage):
         return self
 
     def eyebrow_text(self):
-        return self.driver.find_element(By.ID, "page-eyebrow").text
+        # .text returns the RENDERED text, which reflects CSS
+        # text-transform: uppercase on .eyebrow (so "Admin Dashboard"
+        # comes back as "ADMIN DASHBOARD" in Firefox). textContent reads
+        # the original DOM text regardless of CSS styling, avoiding this
+        # exact case-sensitivity mismatch.
+        el = self.driver.find_element(By.ID, "page-eyebrow")
+        return el.get_attribute("textContent") or ""
 
     def open_users_tab(self):
         self._click_when_present(
