@@ -1,0 +1,356 @@
+/* public/css/home.css
+   -----------------------------------------------------------------------
+   Retro/vintage treatment for the SecureFlow homepage ONLY.
+   Everything here is scoped under `body.retro-home` (or new `.rh-*`
+   classes not used anywhere else), so nothing here can leak into or
+   affect the Dashboard, Admin, Testing, or Register pages, which keep
+   their existing clean/professional look from styles.css untouched.
+   The functional login form still uses styles.css's .field / .alert /
+   .btn / .password-field / .spinner classes so login.js's existing
+   behavior (validation, toggles, loading state) needs zero changes.
+   ----------------------------------------------------------------------- */
+
+body.retro-home {
+  --paper: #efe7d6;
+  --paper-dark: #e4d9c2;
+  --ink: #201c17;
+  --ink-soft: #4a4238;
+  --cream: #f7f2e7;
+  --accent: #a13a2c;
+  --accent-dark: #7e2c20;
+  --teal: #3f6a5e;
+  --border-thick: 2.5px;
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Special Elite', 'Courier New', monospace;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Subtle film-grain overlay, generated inline (no external image asset,
+   works fully offline). Sits above the paper color, below all content. */
+body.retro-home::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+.retro-home * { box-sizing: border-box; }
+.retro-home h1, .retro-home h2, .retro-home h3 {
+  font-family: 'Anton', 'Helvetica Neue', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  margin: 0;
+}
+.retro-home a { color: inherit; }
+.retro-home main, .retro-home header, .retro-home footer { position: relative; z-index: 1; }
+
+/* ---------------------------------------------------------------- */
+/* Zigzag "torn paper" divider — pure CSS, no image assets            */
+/* ---------------------------------------------------------------- */
+.rh-zigzag {
+  height: 16px;
+  width: 100%;
+  background:
+    linear-gradient(135deg, var(--ink) 25%, transparent 25%) 0 0 / 16px 16px,
+    linear-gradient(225deg, var(--ink) 25%, transparent 25%) 0 0 / 16px 16px;
+  background-color: var(--paper);
+}
+
+/* ---------------------------------------------------------------- */
+/* Header / nav                                                       */
+/* ---------------------------------------------------------------- */
+.rh-header {
+  background: var(--ink);
+  color: var(--cream);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.rh-nav {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 14px 24px;
+}
+.rh-nav > * + * { margin-left: 24px; }
+.rh-brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  margin-right: auto;
+}
+.rh-brand-mark {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent);
+  margin-right: 10px;
+  color: var(--cream);
+  font-family: 'Anton', sans-serif;
+  font-size: 15px;
+  border: 2px solid var(--cream);
+  flex-shrink: 0;
+}
+.rh-brand-mark-sm { width: 24px; height: 24px; font-size: 11px; }
+.rh-brand-name {
+  font-family: 'Anton', sans-serif;
+  font-size: 19px;
+  letter-spacing: 0.02em;
+}
+.rh-nav-links {
+  list-style: none;
+  display: flex;
+  margin: 0; padding: 0;
+}
+.rh-nav-links li + li { margin-left: 22px; }
+.rh-nav-links a {
+  text-decoration: none;
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cream);
+  opacity: 0.85;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 3px;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+.rh-nav-links a:hover { opacity: 1; border-color: var(--accent); text-decoration: none; }
+.rh-nav-cta {
+  text-decoration: none;
+  font-size: 12.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: var(--cream);
+  padding: 8px 16px;
+  border: 2px solid var(--cream);
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.rh-nav-cta:hover { background: var(--accent-dark); text-decoration: none; }
+.rh-nav-cta:active { transform: scale(0.96); }
+
+/* ---------------------------------------------------------------- */
+/* Buttons (decorative hero CTAs — the functional submit button      */
+/* keeps styles.css's .btn/.btn-primary base, overridden below only  */
+/* in appearance via .rh-submit-btn)                                 */
+/* ---------------------------------------------------------------- */
+.rh-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'Special Elite', monospace;
+  font-size: 14.5px;
+  letter-spacing: 0.03em;
+  padding: 13px 26px;
+  border: var(--border-thick) solid var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease;
+}
+.rh-btn:hover { text-decoration: none; }
+.rh-btn:active { transform: scale(0.97); }
+.rh-btn-solid { background: var(--ink); color: var(--cream); }
+.rh-btn-solid:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: var(--cream); }
+.rh-btn-outline { background: transparent; color: var(--ink); }
+.rh-btn-outline:hover { background: var(--ink); color: var(--cream); }
+
+.retro-home .rh-submit-btn {
+  background: var(--ink) !important;
+  border: var(--border-thick) solid var(--ink);
+  border-radius: 0;
+  font-family: 'Special Elite', monospace;
+  letter-spacing: 0.03em;
+  box-shadow: none;
+}
+.retro-home .rh-submit-btn:hover { background: var(--accent-dark) !important; }
+
+/* ---------------------------------------------------------------- */
+/* Hero                                                                */
+/* ---------------------------------------------------------------- */
+.rh-hero {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 56px 24px 72px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.rh-hero-copy {
+  flex: 1 1 440px;
+  margin-right: 48px;
+  min-width: 320px;
+}
+.rh-login-card {
+  flex: 1 1 380px;
+  min-width: 300px;
+  max-width: 420px;
+}
+.rh-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  font-family: 'Special Elite', monospace;
+}
+.rh-eyebrow-light { color: #e7b7ac; }
+.rh-headline {
+  font-size: clamp(48px, 7vw, 80px);
+  line-height: 0.95;
+  margin-bottom: 14px;
+}
+.rh-subhead {
+  font-family: 'Special Elite', monospace;
+  font-size: 17px;
+  color: var(--ink-soft);
+  margin: 0 0 18px;
+  line-height: 1.5;
+}
+.rh-desc {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  max-width: 46ch;
+  margin: 0 0 28px;
+}
+.rh-hero-actions { display: flex; flex-wrap: wrap; }
+.rh-hero-actions > * + * { margin-left: 14px; }
+
+/* ---------------------------------------------------------------- */
+/* Login "postcard" card                                              */
+/* ---------------------------------------------------------------- */
+.rh-login-card {
+  position: relative;
+  background: var(--cream);
+  border: var(--border-thick) solid var(--ink);
+  box-shadow: 9px 9px 0 var(--ink);
+  padding: 34px 30px 26px;
+  transform: rotate(0.6deg);
+  scroll-margin-top: 100px;
+}
+.rh-postcard-tab {
+  position: absolute;
+  top: -16px; left: 28px;
+  background: var(--accent);
+  color: var(--cream);
+  font-family: 'Special Elite', monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border: 2px solid var(--ink);
+}
+.rh-login-card label { font-family: 'Special Elite', monospace; letter-spacing: 0.02em; }
+.rh-register-line {
+  font-family: 'Special Elite', monospace;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 16px;
+  color: var(--ink-soft);
+}
+.rh-register-line a { text-decoration: underline; color: var(--accent); font-weight: bold; }
+
+/* ---------------------------------------------------------------- */
+/* Sections                                                            */
+/* ---------------------------------------------------------------- */
+.rh-section { padding: 64px 24px; }
+.rh-section-paper { background: var(--paper-dark); }
+.rh-section-ink { background: var(--ink); color: var(--cream); }
+.rh-section-head {
+  max-width: 1180px;
+  margin: 0 auto 36px;
+  text-align: center;
+}
+.rh-h2 { font-size: clamp(26px, 4vw, 38px); margin-bottom: 10px; }
+h2.rh-h2-light { color: var(--cream); }
+.rh-desc-light { color: #d8cfbf; max-width: 60ch; margin: 12px auto 0; }
+
+.rh-card-grid {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.rh-card-grid .rh-card {
+  flex: 1 1 190px;
+  max-width: 220px;
+  margin: 8px;
+}
+.rh-card-grid-3 .rh-card { flex: 1 1 280px; max-width: 340px; }
+
+.rh-card {
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  padding: 22px 18px;
+  box-shadow: 5px 5px 0 var(--ink);
+  transition: opacity 0.45s ease, transform 0.45s ease, box-shadow 0.15s ease;
+  /* Visible by default -- content must never depend on JS/observer
+     timing to become visible (Selenium assertions, and real users with
+     JS disabled or slow, must still see this). */
+  opacity: 1;
+  transform: none;
+}
+.rh-card.rh-just-revealed { animation: rh-pop-in 0.5s ease; }
+@keyframes rh-pop-in {
+  from { opacity: 0.4; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rh-card:hover { transform: translateY(-3px); box-shadow: 7px 7px 0 var(--ink); }
+.rh-card i { width: 26px; height: 26px; color: var(--accent); margin-bottom: 12px; stroke-width: 2; }
+.rh-card h3 { font-size: 16px; margin-bottom: 8px; }
+.rh-card p {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px; line-height: 1.6; color: var(--ink-soft); margin: 0;
+}
+.rh-card-dark {
+  background: #2a251e;
+  border-color: var(--cream);
+  box-shadow: 5px 5px 0 var(--teal);
+  color: var(--cream);
+}
+.rh-card-dark h3 { color: var(--cream); }
+.rh-card-dark p { color: #cfc6b4; }
+.rh-card-dark i { color: #6fa393; }
+
+/* ---------------------------------------------------------------- */
+/* Footer                                                              */
+/* ---------------------------------------------------------------- */
+.rh-footer {
+  background: var(--ink);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Special Elite', monospace;
+  font-size: 13px;
+  border-top: 3px solid var(--accent);
+}
+.rh-footer > * + * { margin-left: 10px; }
+.rh-footer-copy { margin-left: auto; opacity: 0.7; }
+
+/* ---------------------------------------------------------------- */
+/* Responsive                                                          */
+/* ---------------------------------------------------------------- */
+@media (max-width: 980px) {
+  .rh-hero-copy { margin-right: 0; margin-bottom: 36px; }
+  .rh-nav-links { display: none; }
+}
+@media (max-width: 640px) {
+  .rh-card-grid .rh-card { flex-basis: 100%; max-width: 100%; margin-left: 0; margin-right: 0; }
+  .rh-hero { padding: 40px 18px 56px; }
+  .rh-login-card { transform: none; padding: 28px 20px 22px; }
+  .rh-nav { padding: 12px 16px; }
+  .rh-nav > * + * { margin-left: 14px; }
+  .rh-nav-cta { padding: 7px 12px; font-size: 11.5px; }
+  .rh-footer { flex-wrap: wrap; text-align: center; }
+  .rh-footer-copy { margin-left: 0; width: 100%; }
+}

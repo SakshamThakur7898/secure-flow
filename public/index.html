@@ -5,53 +5,160 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SecureFlow — Sign In</title>
 <link rel="stylesheet" href="/css/styles.css" />
+<link rel="stylesheet" href="/css/home.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Special+Elite&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
 </head>
-<body>
-  <div class="centered-shell">
-    <div class="auth-card">
-      <div class="brand">
-        <div class="brand-mark">SF</div>
-        <div class="brand-name">SecureFlow<small>User Management &amp; Storage System</small></div>
+<body class="retro-home">
+
+  <!-- ============================== HEADER ============================== -->
+  <header class="rh-header">
+    <nav class="rh-nav">
+      <a href="#top" class="rh-brand" id="nav-home">
+        <span class="rh-brand-mark">SF</span>
+        <span class="rh-brand-name">SecureFlow</span>
+      </a>
+      <ul class="rh-nav-links">
+        <li><a href="#top">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#security">Security</a></li>
+        <li><a href="#testing">Testing</a></li>
+      </ul>
+      <a href="#login-card" class="rh-nav-cta" id="nav-signin">Sign In</a>
+    </nav>
+  </header>
+
+  <div class="rh-zigzag" aria-hidden="true"></div>
+
+  <!-- ============================== HERO ================================ -->
+  <main id="top">
+    <section class="rh-hero">
+      <div class="rh-hero-copy">
+        <div class="rh-eyebrow">User Management &amp; Access Control</div>
+        <h1 class="rh-headline">SecureFlow</h1>
+        <p class="rh-subhead">Secure User Management. Verified Access. Reliable Testing.</p>
+        <p class="rh-desc">
+          SecureFlow provides a structured system for user registration, employee verification,
+          authentication, role-based access control, and administrative management — with
+          built-in functionality designed for systematic software testing.
+        </p>
+        <div class="rh-hero-actions">
+          <button type="button" class="rh-btn rh-btn-solid" id="hero-login-btn">Sign In</button>
+          <a href="/register" class="rh-btn rh-btn-outline" id="hero-register-btn">Create Account</a>
+        </div>
       </div>
 
-      <div class="alert alert-error" id="alert-error" role="alert"></div>
-      <div class="alert alert-success" id="alert-success" role="status"></div>
+      <!-- ===================== LOGIN CARD (functional form, IDs unchanged) ===================== -->
+      <div class="rh-login-card" id="login-card">
+        <div class="rh-postcard-tab">Sign In</div>
 
-      <form id="login-form" novalidate>
-        <div class="field">
-          <label for="identifier">Email or Username</label>
-          <input id="identifier" name="identifier" type="text" autocomplete="username" placeholder="you@company.com" />
-          <div class="field-error"></div>
-        </div>
-        <div class="field">
-          <label for="password">Password</label>
-          <div class="password-field">
-            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" />
-            <button type="button" class="password-toggle" id="toggle-password" aria-label="Show password">SHOW</button>
+        <div class="alert alert-error" id="alert-error" role="alert"></div>
+        <div class="alert alert-success" id="alert-success" role="status"></div>
+
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="identifier">Email or Username</label>
+            <input id="identifier" name="identifier" type="text" autocomplete="username" placeholder="you@company.com" />
+            <div class="field-error"></div>
           </div>
-          <div class="field-error"></div>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="password-field">
+              <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+              <button type="button" class="password-toggle" id="toggle-password" aria-label="Show password">SHOW</button>
+            </div>
+            <div class="field-error"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block rh-submit-btn" id="login-btn">
+            <span id="login-btn-label">Log In</span>
+            <span id="login-spinner" class="spinner" style="display:none;"></span>
+          </button>
+        </form>
+
+        <p class="rh-register-line">
+          Don't have an account? <a href="/register" id="register-link">Create one</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ==================== FEATURE HIGHLIGHTS ("About") ==================== -->
+    <section class="rh-section rh-section-paper" id="about">
+      <div class="rh-section-head">
+        <div class="rh-eyebrow">About SecureFlow</div>
+        <h2 class="rh-h2">Everything a controlled user base needs</h2>
+      </div>
+      <div class="rh-card-grid">
+        <div class="rh-card">
+          <i data-lucide="user-plus"></i>
+          <h3>User Registration</h3>
+          <p>Users can create accounts and submit their details for verification.</p>
         </div>
+        <div class="rh-card">
+          <i data-lucide="user-check"></i>
+          <h3>Employee Verification</h3>
+          <p>Authorized users can verify or reject employee accounts.</p>
+        </div>
+        <div class="rh-card">
+          <i data-lucide="key-round"></i>
+          <h3>Role-Based Access</h3>
+          <p>Access is controlled according to Employee, Manager, or Admin.</p>
+        </div>
+        <div class="rh-card" id="security">
+          <i data-lucide="shield-check"></i>
+          <h3>Secure Authentication</h3>
+          <p>Session-based authentication with salted, hashed passwords — never stored in plain text.</p>
+        </div>
+        <div class="rh-card">
+          <i data-lucide="flask-conical"></i>
+          <h3>Built-in Testing</h3>
+          <p>Administrators can access the Testing section to execute application-level functional checks.</p>
+        </div>
+      </div>
+    </section>
 
-        <button type="submit" class="btn btn-primary btn-block" id="login-btn">
-          <span id="login-btn-label">Log In</span>
-          <span id="login-spinner" class="spinner" style="display:none;"></span>
-        </button>
-      </form>
+    <!-- ==================== TESTING-FOCUSED SECTION ==================== -->
+    <section class="rh-section rh-section-ink" id="testing">
+      <div class="rh-section-head">
+        <div class="rh-eyebrow rh-eyebrow-light">Software Testing Project</div>
+        <h2 class="rh-h2 rh-h2-light">Built for Reliable Testing</h2>
+        <p class="rh-desc rh-desc-light">
+          SecureFlow provides stable user flows, predictable interfaces, role-based scenarios, and
+          dedicated testing functionality to support functional and automated browser testing.
+        </p>
+      </div>
+      <div class="rh-card-grid rh-card-grid-3">
+        <div class="rh-card rh-card-dark">
+          <i data-lucide="check-circle-2"></i>
+          <h3>Functional Testing</h3>
+          <p>The application contains a built-in Testing tab for checking major SecureFlow requirements.</p>
+        </div>
+        <div class="rh-card rh-card-dark">
+          <i data-lucide="globe"></i>
+          <h3>Selenium Automation</h3>
+          <p>Selenium + Pytest automates real browser interactions: launch, login (valid/invalid),
+             registration, duplicate rejection, admin access, role restriction, and logout.</p>
+        </div>
+        <div class="rh-card rh-card-dark">
+          <i data-lucide="layout-template"></i>
+          <h3>Page Object Model</h3>
+          <p>The Selenium suite separates page structure, element locators, user actions, and test
+             cases — making the automation suite easier to maintain.</p>
+        </div>
+      </div>
+    </section>
+  </main>
 
-      <p class="mt-16 text-muted" style="text-align:center; font-size: 13.5px;">
-        Don't have an account? <a href="/register">Create an account</a>
-      </p>
-
-      <hr class="divider" />
-      <p class="text-faint" style="font-size: 12px; text-align:center;">
-        Demo accounts — see README for credentials:<br />
-        <strong>admin</strong> · <strong>manager</strong> · <strong>employee</strong> · <strong>pending</strong>
-      </p>
-    </div>
-  </div>
+  <!-- ============================== FOOTER ============================== -->
+  <footer class="rh-footer">
+    <span class="rh-brand-mark rh-brand-mark-sm">SF</span>
+    <span>SecureFlow</span>
+    <span class="rh-footer-copy">&copy; 2026</span>
+  </footer>
 
   <script src="/js/api.js"></script>
   <script src="/js/login.js"></script>
+  <script src="/js/home.js"></script>
 </body>
 </html>
